@@ -110,7 +110,7 @@ const Date = () => {
         // }}
         
         style={{
-           height: "71%", 
+           height: 340, 
            width:"90%",
            marginTop: 30,
            marginHorizontal: 20,

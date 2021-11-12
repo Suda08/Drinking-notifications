@@ -1,55 +1,55 @@
-import React from 'react';
-import { StyleSheet, View, Text, } from 'react-native';
-import Weather from '../Weather/Weather';
-import { API_KEY } from '../../utils/WeatherAPIKey';
-import GeoLocation from '@react-native-community/geolocation';
-navigator.geolocation = require('@react-native-community/geolocation');
+// import React from 'react';
+// import { StyleSheet, View, Text, } from 'react-native';
+// import Weather from '../Weather/Weather';
+// import { API_KEY } from '../../utils/WeatherAPIKey';
+// import GeoLocation from '@react-native-community/geolocation';
+// navigator.geolocation = require('@react-native-community/geolocation');
 
 
-export default class LocalWeather extends React.Component {
-  state = {
-    isLoading: true,
-    temperature: 26,
-    weatherCondition: 'Clear',
-    error: null
-  }
+// export default class LocalWeather extends React.Component {
+//   state = {
+//     isLoading: true,
+//     temperature: 26,
+//     weatherCondition: 'Clear',
+//     error: null
+//   }
 
-  componentDidMount() {
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        this.getWeather(position.coords.latitude, position.coords.longitude);
-      },
-      error => {
-        this.setState({ error: 'Error While Getting Weather Update' });
-      }
-    );
-  }
+//   componentDidMount() {
+//     navigator.geolocation.getCurrentPosition(
+//       position => {
+//         this.getWeather(position.coords.latitude, position.coords.longitude);
+//       },
+//       error => {
+//         this.setState({ error: 'Error While Getting Weather Update' });
+//       }
+//     );
+//   }
 
-  getWeather(lat = 25, lon = 25) {
-    console.log(lat, lon, 'lat,lon')
-    fetch(
-      `http://api.openweathermap.org/data/2.5/weather?lat=13.7594&lon=100.4889&APPID=${API_KEY}&units=metric`
-    ).then(resp => resp.json())
-      .then(json => {
-        //console.log(json,'weather');
-        this.setState({
-          temperature: Math.round(json.main.temp).toFixed(),
-          weatherCondition: json.weather[0].main,
-          isLoading: false
-        })
-      })
-  }
-  render() {
-    const { temperature, weatherCondition, isLoading } = this.state;
-    return (
-      <View >
-        {isLoading ? <Text> </Text> :
-          <Weather weather={weatherCondition} temperature={temperature} />
+//   getWeather(lat = 25, lon = 25) {
+//     console.log(lat, lon, 'lat,lon')
+//     fetch(
+//       `http://api.openweathermap.org/data/2.5/weather?lat=13.7594&lon=100.4889&APPID=${API_KEY}&units=metric`
+//     ).then(resp => resp.json())
+//       .then(json => {
+//         //console.log(json,'weather');
+//         this.setState({
+//           temperature: Math.round(json.main.temp).toFixed(),
+//           weatherCondition: json.weather[0].main,
+//           isLoading: false
+//         })
+//       })
+//   }
+//   render() {
+//     const { temperature, weatherCondition, isLoading } = this.state;
+//     return (
+//       <View >
+//         {isLoading ? <Text> </Text> :
+//           <Weather weather={weatherCondition} temperature={temperature} />
 
-        }
-      </View>
-    )
-  }
-}
+//         }
+//       </View>
+//     )
+//   }
+// }
 
 
