@@ -64,7 +64,7 @@ const Date = () => {
         // }}
         markingType={'custom'}
         markedDates={{
-          '2021-05-28': {
+          '2021-11-13': {
             customStyles: {
               container: {
                 backgroundColor: 'green'
@@ -75,7 +75,19 @@ const Date = () => {
               }
             }
           },
-          '2021-05-29': {
+
+          '2021-11-12': {
+            customStyles: {
+              container: {
+                backgroundColor: 'yellow'
+              },
+              text: {
+                color: 'black',
+                fontWeight: 'bold'
+              }
+            }
+          },
+          '2021-11-05': {
             customStyles: {
               container: {
                 backgroundColor: 'white',
@@ -88,7 +100,7 @@ const Date = () => {
           }
         }}
 
-       
+
         onDayLongPress={(e) => {
           console.log(`e`, e)
         }}
@@ -108,13 +120,14 @@ const Date = () => {
         // onDayPress={(e) => {
         //   console.log(`e`, e)
         // }}
-        
+
         style={{
-           height: 340, 
-           width:"90%",
-           marginTop: 30,
-           marginHorizontal: 20,
-           borderRadius: 40,}
+          height: 340,
+          width: "90%",
+          marginTop: 30,
+          marginHorizontal: 20,
+          borderRadius: 40,
+        }
         }
       />
     </>
