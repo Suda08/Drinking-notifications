@@ -5,6 +5,7 @@ import LoginScreen from './screen/Login';
 import SignupScreen from './screen/SignupScreen';
 import MyTabs from './screen/Tabs';
 import TimerNotification from './test';
+import { Datetime } from './testdatetime';
 
 const Stack = createStackNavigator();
 
@@ -13,8 +14,10 @@ const App = () => {
   return (
     <NavigationContainer >
       <Stack.Navigator>
-        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="TimerNotification" component={TimerNotification} options={{ headerShown: false }} />
+       
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Datetime" component={Datetime} options={{ headerShown: false }} />
+ <Stack.Screen name="TimerNotification" component={TimerNotification} options={{ headerShown: false }} />
         <Stack.Screen name="SignupScreen" component={SignupScreen} options={{ headerShown: false }} />
         <Stack.Screen name="MyTabs" component={MyTabs} options={{ headerShown: false }} />
       </Stack.Navigator>

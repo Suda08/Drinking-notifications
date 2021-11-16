@@ -1,4 +1,6 @@
-import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 
 
@@ -11,6 +13,40 @@ LocaleConfig.locales['th'] = {
 }
 LocaleConfig.defaultLocale = "th"
 const Date = () => {
+
+  const [uid, setUid] = useState();
+  const [calendar, setCalander] = useState();
+
+  const Getid = async () => {
+    try {
+      const res = await AsyncStorage.getItem('u_id');
+      setUid(res);
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    Getid();
+  });
+
+  useEffect(() => {
+    const fectch = async () => {
+      try {
+        const res = await axios.get(IP + '/calendar.php', {
+          params: {
+            u_id: uid
+          }
+        });
+        setCalander(res.data);
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    fectch();
+  }, [calendar])
+
+  //console.log('calender :' + calendar)
 
   return (
     <>
@@ -62,44 +98,15 @@ const Date = () => {
         //   '2021-05-05': { color: 'green' },
         //   '2021-05-06': { color: 'green', endingDay: true }
         // }}
-        markingType={'custom'}
-        markedDates={{
-          '2021-11-13': {
-            customStyles: {
-              container: {
-                backgroundColor: 'green'
-              },
-              text: {
-                color: 'black',
-                fontWeight: 'bold'
-              }
-            }
-          },
-
-          '2021-11-12': {
-            customStyles: {
-              container: {
-                backgroundColor: 'yellow'
-              },
-              text: {
-                color: 'black',
-                fontWeight: 'bold'
-              }
-            }
-          },
-          '2021-11-05': {
-            customStyles: {
-              container: {
-                backgroundColor: 'white',
-                elevation: 20
-              },
-              text: {
-                color: 'blue'
-              }
-            }
-          }
-        }}
-
+        markedDates={calendar}
+        // markedDates={{
+        //   '2021-11-14': { "selected": true },
+        //   '2021-11-15': { startingDay: true, color: 'green' },
+        //   '2021-05-23': { selected: true, endingDay: true, color: 'green', textColor: '#fff' },
+        //   '2021-05-04': { startingDay: true, color: 'green', },
+        //   '2021-05-05': { color: 'green' },
+        //   '2021-05-06': { color: 'green', endingDay: true }
+        // }}
 
         onDayLongPress={(e) => {
           console.log(`e`, e)

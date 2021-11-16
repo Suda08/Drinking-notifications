@@ -1,89 +1,123 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Platform, Image, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import FormInput from '../components/FormInput/FormInputLogin';
 import FormButtonLogin from '../components/Button/FormButtonLogin';
 import SocialButton from '../components/Button/SocialButton';
-
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import MyTabs from './Tabs';
+import { IP } from '../ipaddress';
 
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
+  const [uid, setUid] = useState();
+  const [submit, setSubmit] = useState(false);
 
+
+  const Getid = async () => {
+    try {
+      const res = await AsyncStorage.getItem('u_id');
+      setUid(res)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    Getid();
+  });
+
+
+
+  useEffect(() => {
+    const Login = async () => {
+      try {
+        const res = await axios.get(IP + '/login.php', {
+          params: {
+            username: email,
+            password: password
+          }
+        })
+        if (res.data.onLogin == 'success') {
+          await AsyncStorage.setItem('u_id', res.data.u_id);
+          navigation.navigate('MyTabs');
+          setSubmit(false)
+        } else {
+          alert('รหัสผ่านผิดกรุณากรอกใหม่')
+          setSubmit(false)
+        }
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    if (submit) Login();
+  }, [submit])
 
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {/**   <Image
-          source={require('../assets/icon.png')}
-          style={styles.logo}
-        />*/}
-        <Text style={styles.text}>เข้าสู่ระบบ</Text>
+    <>
+      {uid == null ? (
+        <>
+          <SafeAreaView style={styles.container}>
+            <ScrollView style={styles.scrollView}>
+            <Image style={styles.logo} source={require('../assets/icon.png')} />
+         
+        
+              <Text style={styles.text}>เข้าสู่ระบบ</Text>
 
-        <FormInput
-          labelValue={email}
-          onChangeText={(userEmail) => setEmail(userEmail)}
-          placeholderText="อีเมล"
-          iconType="user"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
+              <FormInput
+                labelValue={email}
+                onChangeText={(userEmail) => setEmail(userEmail)}
+                placeholderText="ชื่อผู้ใช้"
+                iconType="user"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
 
-        <FormInput
-          labelValue={password}
-          onChangeText={(userPassword) => setPassword(userPassword)}
-          placeholderText="รหัสผ่าน"
-          iconType="lock"
-          secureTextEntry={true}
-        />
-        <TouchableOpacity style={styles.forgotButton} onPress={() => { }}>
-          <Text style={styles.navButtonText}>ลืมรหัสผ่าน ?</Text>
-        </TouchableOpacity>
-
-
-        <FormButtonLogin
-          buttonTitle="เข้าสู่ระบบ"
-          onPress={() => navigation.navigate('MyTabs')}
-        />
-
-        <Text style={styles.text1}>หรือ</Text>
-
-        {Platform.OS === 'android' ? (
-          <View>
-            <SocialButton
-              buttonTitle="ลงชื่อเข้าใช้ด้วย Facebook"
-              btnType="facebook"
-              color="#ffffff"
-              backgroundColor="#3E5C9A"
-              onPress={() => fbLogin()}
-            />
-
-            <SocialButton
-              buttonTitle="ลงชื่อเข้าใช้ด้วย Google"
-              btnType="google"
-              color="#fff"
-              backgroundColor="#DF4B38"
-              onPress={() => googleLogin()}
-            />
-          </View>
-        ) : null}
+              <FormInput
+                labelValue={password}
+                onChangeText={(userPassword) => setPassword(userPassword)}
+                placeholderText="รหัสผ่าน"
+                iconType="lock"
+                secureTextEntry={true}
+              />
+              <TouchableOpacity style={styles.forgotButton} onPress={() => { }}>
+                <Text style={styles.navButtonText}>ลืมรหัสผ่าน ?</Text>
+              </TouchableOpacity>
 
 
-        <View style={styles.textPrivate}>
-          <Text style={styles.color_textPrivate}>
-            ยังไม่ลงทะเบียน ?   {' '}
-          </Text>
+              <FormButtonLogin
+                buttonTitle="เข้าสู่ระบบ"
+                onPress={() => setSubmit(true)}
+              />
 
-          <TouchableOpacity
-            style={styles.navButton}
-            onPress={() => navigation.navigate('SignupScreen')}>
-            <Text style={styles.nav1ButtonText}>ลงทะเบียน</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+             
+
+
+              <View style={styles.textPrivate}>
+                <Text style={styles.color_textPrivate}>
+                  ยังไม่ลงทะเบียน ?   {' '}
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.navButton}
+                  onPress={() => navigation.navigate('SignupScreen')}>
+                  <Text style={styles.nav1ButtonText}>ลงทะเบียน</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </>
+      ) : (
+        <>
+          <MyTabs />
+        </>
+      )}
+
+    </>
   );
 };
 
@@ -102,11 +136,11 @@ const styles = StyleSheet.create({
     marginTop: -20,
   },
   logo: {
-    height: 125,
-    width: 110,
+    height: 135,
+    width: 120,
     resizeMode: 'cover',
     marginHorizontal: 150,
-    marginTop: 10,
+    marginTop: 90,
 
   },
   text: {

@@ -21,7 +21,6 @@ const onSubmit = async (seconds) => {
         },
         trigger: {
             seconds: seconds,
-            repeats: true
         }
     });
 };

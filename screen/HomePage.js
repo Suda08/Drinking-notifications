@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, StatusBar, SafeAreaView, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, SafeAreaView, TouchableOpacity, Image, ScrollView, Dimensions, FlatList } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ButtomSheet1 from "../components/Button/ButtomSheet1";
@@ -9,30 +9,84 @@ import { Header } from 'react-native-elements';
 import Slider from '@react-native-community/slider';
 import ProgressCircle from 'react-native-progress-circle'
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { IP } from "../ipaddress";
+import Constants from 'expo-constants';
+import * as Permissions from 'expo-permissions';
+import * as Notifications from 'expo-notifications';
+
 const screenWidth = Dimensions.get('window').width;
+
+
 
 const HomePage = ({ navigation }) => {
   const [currentDate, setcurrentDate] = useState('')
   const [target, setTarget] = useState(600);
   const [data, setData] = useState([]);
+  const [val, setVal] = useState();
+  const [uid, setUid] = useState();
+  const [temp, setTemp] = useState();
+  const [tempdes, setTempdes] = useState();
+  const [icon, setIcon] = useState();
+  const [text, onChangeText] = useState(60);
+ 
+
+  const getIcon = 'http://openweathermap.org/img/wn/'
+  const imgpath = IP + '/image/';
+
+  const Getid = async () => {
+    try {
+      const res = await AsyncStorage.getItem('u_id');
+      if (res != null) {
+        setUid(res);
+      } else {
+        setUid(1);
+      }
+
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+
+  useEffect(() => {
+    Getid();
+  });
+
 
   useEffect(() => {
     const fectch = async () => {
       try {
-        const res = await axios.get('http://192.168.1.84/dw_reminder/main.php', {
+        const res = await axios.get(IP + '/main.php', {
           params: {
-            u_id: 1
+            u_id: uid
           }
         });
         setData(res.data);
-        setDatalog(res.data.datalog);
-        console.log(res.data);
       } catch (err) {
         console.log(err)
       }
     }
     fectch();
-  }, [])
+  }, [data])
+
+ 
+
+
+
+  useEffect(() => {
+    const fectch = async () => {
+      try {
+        const res = await axios.get(IP + '/temp_api.php');
+        setTemp(res.data.temp);
+        setTempdes(res.data.tempdes);
+        setIcon(res.data.icon);
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    fectch();
+  }, [temp])
 
 
   useEffect(() => {
@@ -44,6 +98,9 @@ const HomePage = ({ navigation }) => {
     )
   }, [])
 
+
+
+
   return (
     <>
       <Header
@@ -54,82 +111,126 @@ const HomePage = ({ navigation }) => {
         }}
         centerComponent={
           <Image source={require('../assets/icon.png')}
-            style={{ height: 50, width: 40 }} />
+            style={{ height: 40, width: 30 }} />
         }
 
       />
       <View style={styles.container}>
-        <SafeAreaView style={{ marginTop: 20 }}>
-          {data.map((item) => (
-            <>
-              <View style={{ width: '100%', flexDirection: 'row' }}>
-                <View style={{ width: '50%' }}>
-                  <Text style={styles.textStyle}>วันนี้</Text>
-                  <Text style={styles.text}>{currentDate}</Text>
-                </View>
-                <View style={{ width: '50%', alignItems: 'flex-end' }}>
-                  <Text> อุณหภูมิ {item.temp.temp}</Text>
-                </View>
-              </View>
-
-
-
-
-              <View style={styles.absoluteFill}>
-                <ProgressCircle
-                  percent={item.isprogress * 100 / 1500}
-                  radius={120}
-                  borderWidth={10}
-                  color="#79E386"
-                  shadowColor="white"
-                  bgColor='#FFFFFF'
-                >
-                  <View style={{ backgroundColor: 'grey', width: '100%', height: '100%' }}>
-                    <View style={{ width: '100%', height: '55%', justifyContent: 'center', borderBottomColor: 'white', borderBottomWidth: 2 }}>
-                      <View style={{ width: '100%', height: '60%', alignItems: 'center', justifyContent: 'flex-end' }}>
-                        <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>เป้าหมาย</Text>
-                      </View>
-                      <View style={{ width: '100%', height: '40%', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontSize: 18, color: 'white' }}>{item.isexcer.isexcer == true ? (<Text>มี {item.isexcer.count} ครั้ง</Text>) : (<Text>ไม่มี</Text>)} {item.tartget} มล.</Text>
-                      </View>
+        <SafeAreaView style={{ marginTop: -70}}>
+          <FlatList
+            data={data}
+            renderItem={({ item }) => (
+              <>
+                <View style={{ width: '100%', flexDirection: 'row' }}>
+                  <View style={{ width: '50%' }}>
+                    <Text style={styles.textStyle}>วันนี้</Text>
+                    <Text style={styles.text}>{currentDate}</Text>
+                  </View>
+                  <View style={{ width: '50%', alignItems: 'flex-end', height: 80, alignItems: 'center' }}>
+                    <View style={{ width: '70%', height: '40%', alignItems: 'center', justifyContent: 'center' }}>
+                      <Image
+                        source={{ uri: getIcon + icon + '@2x.png' }}
+                      />
+                      <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>{tempdes}</Text>
                     </View>
-                    <View style={{ width: '100%', height: '45%', justifyContent: 'center', alignItems: 'center' }}>
-                      <Text style={{ fontSize: 40, color: 'white', fontWeight: 'bold' }}>{item.isprogress * 100 / 1500} %</Text>
+                    <View style={{ width: '70%', height: '40%', alignItems: 'center', justifyContent: 'center' }}>
+                      <Text style={{ fontSize: 20, color: 'white', fontWeight: 'bold' }}>{temp} C</Text>
                     </View>
                   </View>
-
-                </ProgressCircle>
-              </View>
-
-              <View style={{ width: '100%', alignItems: 'center', }}>
-                <View style={{ width: '80%', height: 50, borderRadius: 10 }}>
-                  <Text style={{ textAlign: 'left', fontSize: 22, paddingTop: 10, fontWeight: 'bold', color: 'white' }}>
-                    บันทึกวันนี้
-                  </Text>
                 </View>
-                <ScrollView style={{ width: '80%', height: 200 }}>
-                  {item.datalog.map((item) => (
-                    <>
-                      <View style={{ width: '100%', height: 70 }}>
-                        <View style={{ width: '100%', height: 50, backgroundColor: 'white', borderRadius: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                          <Text style={{ textAlign: 'center', fontSize: 18, marginRight: 20 }}>
-                            {item.b_name}
+
+
+
+
+                <View style={styles.absoluteFill}>
+                  <ProgressCircle
+                    percent={item.isprogress * 100 / item.target}
+                    radius={120}
+                    borderWidth={10}
+                    color="#79E386"
+                    shadowColor="white"
+                    bgColor="#95B2C5"
+                  >
+                    <View style={{ width: '100%', height: '100%' }}>
+                      <View style={{ width: '100%', height: '55%', justifyContent: 'center', borderBottomColor: 'white', borderBottomWidth: 2 }}>
+                        <View style={{ width: '100%', height: '50%', alignItems: 'center', justifyContent: 'center' }}>
+                          <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'white' }}>เป้าหมาย</Text>
+                        </View>
+                        <View style={{ width: '100%', height: '50%', alignItems: 'center' }}>
+                          <Text style={{ fontSize: 18, color: 'white' }}>
+                            {parseInt(item.target)} มล.
                           </Text>
-                          <Text style={{ textAlign: 'center', fontSize: 18 }}>
-                            {item.d_l_volume}
-                          </Text>
+                          <FlatList
+                            data={item.isexcer}
+                            renderItem={({ item }) => (
+                              <>
+                                {item.isexcer == true ? (
+                                  <>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end', height: 30 }}>
+                                      <MaterialCommunityIcons
+                                        name={'run'}
+                                        size={20}
+                                        color={'tomato'}
+                                      />
+                                      <Text style={{ color: 'tomato' }}> / {item.count}</Text>
+                                    </View>
+                                  </>
+                                ) : (
+                                  <Text></Text>
+                                )}
+                              </>
+                            )}
+                          />
                         </View>
                       </View>
+                      <View style={{ width: '100%', height: '45%', justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ fontSize: 40, color: 'white', fontWeight: 'bold' }}>{parseInt(item.isprogress * 100 / item.target)} %</Text>
+                      </View>
+                    </View>
 
-                    </>
-                  ))}
-                </ScrollView>
-              </View>
-            </>))}
+                  </ProgressCircle>
+                </View>
 
-
-
-
+                <View style={{ width: '100%', alignItems: 'center', }}>
+                  <View style={{ width: '80%', height: 50, borderRadius: 5 }}>
+                    <Text style={{ textAlign: 'left', fontSize: 22, paddingTop: 10, fontWeight: 'bold', color: 'white' }}>
+                      บันทึกวันนี้
+                    </Text>
+                  </View>
+                  <ScrollView style={{ width: '80%', height: 150 }}>
+                    <FlatList
+                      data={item.datalog}
+                      renderItem={({ item }) => (
+                        <>
+                          <View style={{ width: '100%', height: 40 }}>
+                            <View style={{ width: '100%', height: 30,  backgroundColor: '#114A6F', borderRadius: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ textAlign: 'center', fontSize: 18, marginLeft: 10,color:'#fff' }}>
+                                {item.d_l_time.substring(0, 5)+' น.'}
+                              </Text>
+                              <Image
+                                          style={{
+                                            width: 20,
+                                            height: 20,
+                                            marginLeft: 15
+                                          }}
+                                          source={{ uri: imgpath + item.b_image + '.png' }}
+                                        />
+                              <Text style={{ textAlign: 'center', fontSize: 18, marginRight: 50,color:'#fff',marginLeft: 15 }}>
+                                {item.b_name}
+                              </Text>
+                              <Text style={{ textAlign: 'center', fontSize: 18,color:'#fff',marginLeft: 5 }}>
+                                {item.d_l_volume+' มล.'}
+                              </Text>
+                            </View>
+                          </View>
+                        </>
+                      )}
+                    />
+                  </ScrollView>
+                </View>
+              </>
+            )}
+          />
 
           <View style={styles.categoryContainer}>
 
@@ -188,6 +289,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: '100%',
     alignSelf: 'center',
+    
   },
   categoryBtn: {
     flex: 1,

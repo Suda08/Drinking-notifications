@@ -1,0 +1,1 @@
+export const IP = 'http://10.9.162.216/dw_reminder';
